@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShopForge — AI Store Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f6f6f7;
+  --white: #ffffff;
+  --text: #1a1c1d;
+  --text2: #3e4944;
+  --text3: #6e7a73;
+  --border: #e2e2e3;
+  --border2: rgba(0,0,0,0.08);
+  --primary: #00654b;
+  --primary-dark: #004d38;
+  --primary-container: #008060;
+  --primary-light: #d6ffeb;
+  --secondary: #0058bc;
+  --surface: #f9f9fa;
+  --surface-low: #f3f3f4;
+  --surface-high: #e8e8e9;
+  --on-primary: #ffffff;
+  --error: #ba1a1a;
+  --green-dot: #34c759;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+  --r-sm: 8px;
+  --r: 16px;
+  --r-lg: 24px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 24px 16px;
+  gap: 4px;
+}
+
+.sidebar::-webkit-scrollbar { width: 0; }
+
+.sidebar-user {
+  padding: 0 8px 20px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--surface-high);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  color: var(--text2);
+}
+
+.user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.user-plan {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.nav-item:hover { background: var(--surface-low); color: var(--text); }
+
+.nav-item.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-item .material-symbols-outlined {
+  font-size: 20px;
+  color: inherit;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-generate {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+  margin-bottom: 8px;
+}
+
+.btn-generate:hover { background: var(--primary-dark); }
+.btn-generate:disabled { background: var(--text3); cursor: not-allowed; }
+.btn-generate .material-symbols-outlined { font-size: 18px; }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* TOPBAR */
+.topbar {
+  height: 56px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 16px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0 12px;
+  height: 36px;
+  width: 320px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-bar:focus-within {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(0,88,188,0.1);
+  background: var(--white);
+}
+
+.search-bar .material-symbols-outlined { font-size: 18px; color: var(--text3); }
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+}
+
+.search-bar input::placeholder { color: var(--text3); }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+.btn-export {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-export:hover { background: var(--primary-dark); }
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  transition: background 0.15s;
+}
+
+.icon-btn:hover { background: var(--surface-low); }
+.icon-btn .material-symbols-outlined { font-size: 20px; }
+
+/* ── CONTENT AREA ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px;
+}
+
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* PAGE HEADER */
+.page-heading {
+  margin-bottom: 32px;
+}
+
+.page-heading h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.page-heading p {
+  font-size: 14px;
+  color: var(--text2);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* STAT CARDS */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 28px 32px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.stat-card-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--surface-low);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+}
+
+.stat-card-icon .material-symbols-outlined { font-size: 20px; }
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.stat-sub {
+  font-size: 13px;
+  color: var(--primary);
+  margin-top: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-sub.neutral { color: var(--text3); }
+.stat-sub .material-symbols-outlined { font-size: 14px; }
+
+/* BOTTOM GRID */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr;
+  gap: 24px;
+}
+
+/* QUICK ACTIONS */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.action-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+}
+
+.action-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.action-card.primary-action {
+  background: var(--primary);
+  color: white;
+}
+
+.action-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.action-card.primary-action .action-card-desc { color: rgba(255,255,255,0.8); }
+.action-card-desc { font-size: 13px; color: var(--text3); margin-top: 3px; }
+
+.action-card .material-symbols-outlined {
+  font-size: 20px;
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* RECENT GENERATIONS TABLE */
+.recent-card {
+  background: var(--white);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.recent-header {
+  padding: 20px 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.view-all {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 60px;
+  padding: 8px 24px;
+  background: var(--surface-low);
+}
+
+.th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 60px;
+  padding: 14px 24px;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  transition: background 0.1s;
+}
+
+.table-row:hover { background: var(--surface-low); }
+.table-row:last-child { border-bottom: none; }
+
+.row-name { font-size: 14px; font-weight: 400; color: var(--text); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface-high);
+  color: var(--text2);
+}
+
+.badge .material-symbols-outlined { font-size: 13px; }
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-dot { width: 7px; height: 7px; border-radius: 50%; }
+.status-dot.green { background: var(--green-dot); }
+.status-dot.gray { background: var(--text3); }
+
+.status.published { color: var(--primary); }
+.status.draft { color: var(--text3); }
+
+.row-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.1s;
+  font-family: var(--font);
+}
+
+.row-action:hover { background: var(--surface-high); color: var(--text); }
+
+/* ── FORM PAGES ── */
+.form-page {
+  max-width: 680px;
+}
+
+.form-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 32px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+
+.form-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+.field input, .field select, .field textarea {
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  font-family: var(--font);
+  font-size: 14px;
+  border-radius: var(--r-sm);
+  outline: none;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(0,88,188,0.1);
+  background: var(--white);
+}
+
+.field input::placeholder, .field textarea::placeholder { color: var(--text3); }
+
+.field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+.field-hint { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+.field-hint a { color: var(--secondary); text-decoration: none; }
+
+.range-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.range-row span:first-child { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3); }
+.range-val { font-size: 13px; font-weight: 700; color: var(--primary); }
+input[type=range] { width: 100%; accent-color: var(--primary); height: 4px; margin-bottom: 16px; }
+
+/* PROGRESS PHASES */
+.phases {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.phase-row {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.3s;
+}
+
+.phase-row.active { border-color: var(--secondary); background: rgba(0,88,188,0.02); }
+.phase-row.done { border-color: var(--primary); background: rgba(0,101,75,0.02); }
+
+.phase-indicator {
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s;
+}
+
+.phase-indicator.active {
+  background: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(0,88,188,0.15);
+  animation: pulse 1.5s infinite;
+}
+
+.phase-indicator.done { background: var(--primary); box-shadow: 0 0 0 3px rgba(0,101,75,0.15); }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.phase-name { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+.phase-status-text { font-size: 12px; color: var(--text3); }
+.phase-count-text { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+/* PROGRESS BAR */
+.prog-wrap { background: var(--surface-high); border-radius: 20px; height: 4px; overflow: hidden; margin-bottom: 6px; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #00a876); width: 0%; border-radius: 20px; transition: width 0.5s ease; }
+.prog-info { display: flex; justify-content: space-between; }
+.prog-info span { font-size: 12px; font-weight: 500; color: var(--text3); }
+
+/* SESSION STATS */
+.session-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.session-stat {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.session-stat-num { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.session-stat-num.green { color: var(--primary); }
+.session-stat-num.red { color: var(--error); }
+.session-stat-num.blue { color: var(--secondary); }
+.session-stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-top: 2px; }
+
+/* TAGS */
+.tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  padding: 4px 10px;
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tag:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+/* LOG */
+.log-card {
+  background: var(--white);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.log-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-low);
+}
+
+.log-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+.log-count-badge { font-size: 11px; font-weight: 600; color: var(--text3); background: var(--surface-high); padding: 2px 8px; border-radius: 20px; }
+
+.log-body {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+}
+.log-body::-webkit-scrollbar { width: 3px; }
+.log-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.log-entry { display: flex; gap: 10px; padding: 3px 8px; border-radius: 6px; }
+.log-entry:hover { background: var(--surface-low); }
+.log-t { font-size: 11px; color: var(--text3); min-width: 56px; font-family: 'SF Mono', monospace; padding-top: 1px; }
+.log-m { font-size: 12px; color: var(--text2); font-family: 'SF Mono', monospace; line-height: 1.6; }
+.log-m.ok { color: var(--primary); }
+.log-m.err { color: var(--error); }
+.log-m.info { color: var(--secondary); font-weight: 600; }
+.log-m.warn { color: #b45309; }
+.log-m.dim { color: var(--text3); }
+
+/* CJ STATUS */
+.cj-status-msg { font-size: 12px; font-weight: 500; margin-top: 6px; min-height: 16px; }
+
+/* PLAN SUMMARY BOX */
+.plan-box {
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.8;
+}
+.plan-box b { color: var(--primary); font-weight: 600; }
+
+/* BUTTONS */
+.btn-primary-action {
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary-action:hover { background: var(--primary-dark); }
+.btn-primary-action:disabled { background: var(--text3); cursor: not-allowed; }
+.btn-primary-action .material-symbols-outlined { font-size: 18px; }
+
+.btn-secondary-action {
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--error);
+  border: 1px solid rgba(186,26,26,0.2);
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: none;
+}
+
+.btn-secondary-action:hover { background: rgba(186,26,26,0.05); }
+
+.btn-connect {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 6px;
+}
+
+.btn-connect:hover { border-color: var(--primary); color: var(--primary); }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+
+/* SETTINGS FORM */
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-user">
+    <div class="user-avatar">
+      <span class="material-symbols-outlined">person</span>
+    </div>
+    <div class="user-name">ShopForge AI</div>
+    <div class="user-plan">Premium Plan</div>
+  </div>
+
+  <button class="nav-item active" onclick="showPage('dashboard', this)">
+    <span class="material-symbols-outlined">dashboard</span>
+    Dashboard
+  </button>
+
+  <button class="nav-item" onclick="showPage('auto', this)">
+    <span class="material-symbols-outlined">rocket_launch</span>
+    Full Auto
+  </button>
+
+  <button class="nav-item" onclick="showPage('products', this)">
+    <span class="material-symbols-outlined">inventory_2</span>
+    Produits CJ
+  </button>
+
+  <button class="nav-item" onclick="showPage('blog', this)">
+    <span class="material-symbols-outlined">edit_note</span>
+    Blog SEO
+  </button>
+
+  <button class="nav-item" onclick="showPage('descriptions', this)">
+    <span class="material-symbols-outlined">auto_fix_high</span>
+    Descriptions
+  </button>
+
+  <button class="nav-item" onclick="showPage('settings', this)">
+    <span class="material-symbols-outlined">settings</span>
+    Parametres
+  </button>
+
+  <div class="sidebar-bottom">
+    <button class="btn-generate" id="btnGenerate" onclick="handleGenerateClick()">
+      <span class="material-symbols-outlined">bolt</span>
+      Generer du contenu
+    </button>
+    <button class="btn-secondary-action" id="btnStop" onclick="stopAll()">
+      Arreter
+    </button>
+    <button class="nav-item" onclick="">
+      <span class="material-symbols-outlined">help</span>
+      Aide
+    </button>
+    <button class="nav-item" onclick="">
+      <span class="material-symbols-outlined">logout</span>
+      Deconnexion
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="search-bar">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" placeholder="Search..."/>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-export" onclick="showPage('auto', document.querySelector('.nav-item:nth-child(3)'))">Quick Export</button>
+      <div class="icon-btn"><span class="material-symbols-outlined">notifications</span></div>
+      <div class="icon-btn"><span class="material-symbols-outlined">account_circle</span></div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-heading">
+        <h1>Hello, Merchant</h1>
+        <p>Here's a high-level overview of your AI content generation performance and recent activity.</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Total Blog Posts Generated</div>
+            <div class="stat-value" id="dashBlog">0</div>
+            <div class="stat-sub">
+              <span class="material-symbols-outlined">trending_up</span>
+              +12% this month
+            </div>
+          </div>
+          <div class="stat-card-icon">
+            <span class="material-symbols-outlined">edit_note</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Products Created</div>
+            <div class="stat-value" id="dashProducts">0</div>
+            <div class="stat-sub">
+              <span class="material-symbols-outlined">trending_up</span>
+              +5% this month
+            </div>
+          </div>
+          <div class="stat-card-icon">
+            <span class="material-symbols-outlined">inventory_2</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">AI Credits Used</div>
+            <div class="stat-value" id="dashCredits">0</div>
+            <div class="stat-sub neutral">
+              <span class="material-symbols-outlined">info</span>
+              Session actuelle
+            </div>
+          </div>
+          <div class="stat-card-icon">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-grid">
+        <div>
+          <div class="section-title">Quick Actions</div>
+          <div class="action-card primary-action" onclick="showPage('blog', document.querySelectorAll('.nav-item')[4])">
+            <div>
+              <div class="action-card-title">New Blog Post</div>
+              <div class="action-card-desc">Generate SEO-optimized articles</div>
+            </div>
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </div>
+          <div class="action-card" onclick="showPage('products', document.querySelectorAll('.nav-item')[3])">
+            <div>
+              <div class="action-card-title">New Product</div>
+              <div class="action-card-desc">Create compelling product descriptions</div>
+            </div>
+            <span class="material-symbols-outlined" style="color:var(--text3)">arrow_forward</span>
+          </div>
+          <div class="action-card" onclick="showPage('auto', document.querySelectorAll('.nav-item')[2])">
+            <div>
+              <div class="action-card-title">Full Auto</div>
+              <div class="action-card-desc">Boutique complete en un clic</div>
+            </div>
+            <span class="material-symbols-outlined" style="color:var(--text3)">arrow_forward</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="recent-card">
+            <div class="recent-header">
+              <div class="section-title" style="margin:0">Recent Generations</div>
+              <button class="view-all">View All</button>
+            </div>
+            <div class="table-header">
+              <span class="th">Item Name</span>
+              <span class="th">Type</span>
+              <span class="th">Status</span>
+              <span class="th">Action</span>
+            </div>
+            <div id="recentTable">
+              <div class="table-row">
+                <span class="row-name" style="color:var(--text3);font-size:13px;">Aucune generation pour l'instant</span>
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL AUTO -->
+    <div class="page" id="page-auto">
+      <div class="page-heading">
+        <h1>Full Auto</h1>
+        <p>Recherche les produits, genere les descriptions SEO et publie les articles de blog. Tout en un clic.</p>
+      </div>
+      <div class="form-page">
+        <div class="form-card">
+          <div class="form-section-title">Configuration de la campagne</div>
+          <div class="field">
+            <label>Niche produits</label>
+            <input id="autoNiche" type="text" placeholder="ex: wireless headphones, yoga mat, running shoes..." oninput="updatePlan()"/>
+          </div>
+          <div class="field">
+            <label>Articles de blog <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">(un par ligne)</span></label>
+            <textarea id="autoTopics" oninput="updatePlan()" placeholder="Guide complet pour débutants&#10;Top 10 produits tendance&#10;Comment bien choisir&#10;Tendances 2025"></textarea>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Suggestions rapides</div>
+            <div class="tags-row">
+              <span class="tag" onclick="addTopic('Guide d\'achat complet')">Guide d'achat</span>
+              <span class="tag" onclick="addTopic('Top 10 tendance')">Top 10</span>
+              <span class="tag" onclick="addTopic('Comment bien choisir')">Comment choisir</span>
+              <span class="tag" onclick="addTopic('Comparatif et avis')">Comparatif</span>
+              <span class="tag" onclick="addTopic('Tendances 2025')">Tendances 2025</span>
+            </div>
+          </div>
+          <div class="plan-box" id="planSummary">Configure ta niche ci-dessus pour voir le plan de generation.</div>
+        </div>
+
+        <div class="phases" id="autoPhases" style="display:none;">
+          <div class="phase-row" id="phase1"><div class="phase-indicator" id="ph1dot"></div><div style="flex:1"><div class="phase-name">Import produits CJ</div></div><div class="phase-status-text" id="ph1status">En attente</div><div class="phase-count-text" id="ph1count">—</div></div>
+          <div class="phase-row" id="phase2"><div class="phase-indicator" id="ph2dot"></div><div style="flex:1"><div class="phase-name">Descriptions SEO FR+EN</div></div><div class="phase-status-text" id="ph2status">En attente</div><div class="phase-count-text" id="ph2count">—</div></div>
+          <div class="phase-row" id="phase3"><div class="phase-indicator" id="ph3dot"></div><div style="flex:1"><div class="phase-name">Articles de blog</div></div><div class="phase-status-text" id="ph3status">En attente</div><div class="phase-count-text" id="ph3count">—</div></div>
+        </div>
+
+        <div class="session-stats">
+          <div class="session-stat"><div class="session-stat-num blue" id="statTotal">0</div><div class="session-stat-lbl">Total</div></div>
+          <div class="session-stat"><div class="session-stat-num" id="statDone">0</div><div class="session-stat-lbl">Traites</div></div>
+          <div class="session-stat"><div class="session-stat-num green" id="statOk">0</div><div class="session-stat-lbl">Succes</div></div>
+          <div class="session-stat"><div class="session-stat-num red" id="statErr">0</div><div class="session-stat-lbl">Erreurs</div></div>
+        </div>
+        <div class="prog-wrap"><div class="prog-fill" id="progressFill"></div></div>
+        <div class="prog-info" style="margin-bottom:16px;"><span id="progressPct">0%</span><span id="etaText">—</span></div>
+
+        <div class="log-card">
+          <div class="log-header">
+            <span class="log-title">Live Activity</span>
+            <span class="log-count-badge" id="logCount">0</span>
+          </div>
+          <div class="log-body" id="logBody">
+            <div class="log-entry"><span class="log-t">--:--:--</span><span class="log-m dim">En attente...</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUITS CJ -->
+    <div class="page" id="page-products">
+      <div class="page-heading">
+        <h1>Produits CJ</h1>
+        <p>Recherche des produits sur CJ Dropshipping et importe-les sur Shopify avec descriptions SEO.</p>
+      </div>
+      <div class="form-page">
+        <div class="form-card">
+          <div class="form-section-title">Recherche et import</div>
+          <div class="field">
+            <label>Mot-cle niche</label>
+            <input id="searchInput" type="text" placeholder="ex: wireless headphones, yoga mat..." onkeydown="if(event.key==='Enter')searchProducts()"/>
+          </div>
+          <div class="range-row">
+            <span>Nombre de produits</span>
+            <span class="range-val" id="productCountVal">50</span>
+          </div>
+          <input type="range" id="productCount" min="10" max="500" value="50" oninput="document.getElementById('productCountVal').textContent=this.value"/>
+          <div class="range-row">
+            <span>Majoration prix</span>
+            <span class="range-val" id="markupVal">80%</span>
+          </div>
+          <input type="range" id="markup" min="10" max="300" value="80" oninput="document.getElementById('markupVal').textContent=this.value+'%'"/>
+          <button class="btn-primary-action" onclick="searchAndImport()">
+            <span class="material-symbols-outlined">search</span>
+            Rechercher et importer
+          </button>
+        </div>
+
+        <div class="log-card">
+          <div class="log-header">
+            <span class="log-title">Live Activity</span>
+            <span class="log-count-badge" id="logCount2">0</span>
+          </div>
+          <div class="log-body" id="logBody2">
+            <div class="log-entry"><span class="log-t">--:--:--</span><span class="log-m dim">En attente...</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOG SEO -->
+    <div class="page" id="page-blog">
+      <div class="page-heading">
+        <h1>Blog SEO</h1>
+        <p>Genere et publie des articles optimises avec photos Unsplash directement sur Shopify.</p>
+      </div>
+      <div class="form-page">
+        <div class="form-card">
+          <div class="form-section-title">Generation d'articles</div>
+          <div class="field">
+            <label>Sujets d'articles <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">(un par ligne)</span></label>
+            <textarea id="blogTopics" placeholder="10 meilleures chaussures de running 2025&#10;Comment choisir ses sneakers&#10;Guide des tailles de chaussures"></textarea>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Suggestions</div>
+            <div class="tags-row">
+              <span class="tag" onclick="addBlogTopic('Guide d\'achat complet')">Guide d'achat</span>
+              <span class="tag" onclick="addBlogTopic('Top 10 produits tendance')">Top 10</span>
+              <span class="tag" onclick="addBlogTopic('Comment bien choisir')">Comment choisir</span>
+              <span class="tag" onclick="addBlogTopic('Comparatif et avis')">Comparatif</span>
+              <span class="tag" onclick="addBlogTopic('Tendances 2025')">Tendances 2025</span>
+              <span class="tag" onclick="addBlogTopic('Les erreurs à éviter')">Erreurs a eviter</span>
+            </div>
+          </div>
+          <button class="btn-primary-action" onclick="generateBlogArticles()">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            Generer et publier
+          </button>
+        </div>
+        <div class="log-card">
+          <div class="log-header"><span class="log-title">Live Activity</span><span class="log-count-badge" id="logCount3">0</span></div>
+          <div class="log-body" id="logBody3"><div class="log-entry"><span class="log-t">--:--:--</span><span class="log-m dim">En attente...</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTIONS -->
+    <div class="page" id="page-descriptions">
+      <div class="page-heading">
+        <h1>Descriptions SEO</h1>
+        <p>Reecrit tous les titres et descriptions de tes produits Shopify en FR+EN avec un copywriting premium.</p>
+      </div>
+      <div class="form-page">
+        <div class="form-card">
+          <div class="form-section-title">Reecriture en masse</div>
+          <div class="plan-box" style="margin-bottom:20px;">
+            Cet outil recupere tous tes produits Shopify existants et reecrit leurs titres + descriptions en FR et EN avec un copywriting SEO optimise. Parfait apres un import en masse.
+          </div>
+          <button class="btn-primary-action" onclick="startDescriptions()">
+            <span class="material-symbols-outlined">auto_fix_high</span>
+            Reecrire toutes les descriptions
+          </button>
+        </div>
+        <div class="log-card">
+          <div class="log-header"><span class="log-title">Live Activity</span><span class="log-count-badge" id="logCount4">0</span></div>
+          <div class="log-body" id="logBody4"><div class="log-entry"><span class="log-t">--:--:--</span><span class="log-m dim">En attente...</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-heading">
+        <h1>Parametres</h1>
+        <p>Configure tes connexions API et les options de generation.</p>
+      </div>
+      <div class="form-page" style="max-width:800px;">
+
+        <div class="form-card">
+          <div class="form-section-title">CJ Dropshipping</div>
+          <div class="settings-grid">
+            <div class="field"><label>Email</label><input id="cjEmail" type="email" placeholder="email@exemple.com"/></div>
+            <div class="field"><label>Mot de passe</label><input id="cjPassword" type="password" placeholder="••••••••"/></div>
+          </div>
+          <button class="btn-connect" onclick="loginCJ()">Connecter CJ Dropshipping</button>
+          <div class="cj-status-msg" id="cjStatus"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-section-title">Shopify</div>
+          <div class="settings-grid">
+            <div class="field"><label>Store URL</label><input id="shopUrl" type="text" placeholder="store.myshopify.com"/></div>
+            <div class="field"><label>Access Token</label><input id="shopToken" type="password" placeholder="shpat_..."/></div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-section-title">APIs IA</div>
+          <div class="settings-grid">
+            <div class="field">
+              <label>Anthropic API Key</label>
+              <input id="anthropicKey" type="password" placeholder="sk-ant-..."/>
+            </div>
+            <div class="field">
+              <label>Unsplash Access Key <span style="font-weight:400;text-transform:none;letter-spacing:0;">(photos blog)</span></label>
+              <input id="unsplashKey" type="password" placeholder="Cle Unsplash..."/>
+              <div class="field-hint">Gratuit sur <a href="https://unsplash.com/developers" target="_blank">unsplash.com/developers</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-section-title">Options</div>
+          <div class="settings-grid">
+            <div>
+              <div class="range-row"><span>Majoration prix par defaut</span><span class="range-val" id="markupValS">80%</span></div>
+              <input type="range" id="markupS" min="10" max="300" value="80" oninput="document.getElementById('markupValS').textContent=this.value+'%';document.getElementById('markup').value=this.value;document.getElementById('markupVal').textContent=this.value+'%'"/>
+            </div>
+            <div class="field">
+              <label>Langue de generation</label>
+              <select id="lang">
+                <option value="both">FR + EN</option>
+                <option value="fr">Francais uniquement</option>
+                <option value="en">English only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ── STATE ──
+let cjToken=null, stopRequested=false, logN=0, startTime=null, selectedProducts=[];
+let stats={total:0,done:0,ok:0,err:0};
+let dashStats={products:0,blog:0,credits:0};
+let recentItems=[];
+
+// ── NAVIGATION ──
+function showPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn && btn.classList) btn.classList.add('active');
+}
+
+// ── LOGGING ──
+function log(msg, type='', targetId='logBody'){
+  const body=document.getElementById(targetId);
+  if(!body)return;
+  const t=new Date().toTimeString().slice(0,8);
+  const e=document.createElement('div');
+  e.className='log-entry';
+  e.innerHTML=`<span class="log-t">${t}</span><span class="log-m ${type}">${msg}</span>`;
+  body.appendChild(e);
+  body.scrollTop=body.scrollHeight;
+  logN++;
+  const countEl=body.closest('.log-card')?.querySelector('.log-count-badge');
+  if(countEl)countEl.textContent=logN;
+  document.getElementById('logCount').textContent=logN;
+}
+
+// ── STATS ──
+function updateStats(){
+  document.getElementById('statTotal').textContent=stats.total;
+  document.getElementById('statDone').textContent=stats.done;
+  document.getElementById('statOk').textContent=stats.ok;
+  document.getElementById('statErr').textContent=stats.err;
+  const pct=stats.total?Math.round((stats.done/stats.total)*100):0;
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressPct').textContent=pct+'%';
+  if(startTime&&stats.done>0){
+    const elapsed=(Date.now()-startTime)/1000;
+    const perItem=elapsed/stats.done;
+    const rem=(stats.total-stats.done)*perItem;
+    document.getElementById('etaText').textContent=`~${Math.floor(rem/60)}m ${Math.floor(rem%60)}s`;
+  }
+}
+
+function updateDash(){
+  document.getElementById('dashProducts').textContent=dashStats.products;
+  document.getElementById('dashBlog').textContent=dashStats.blog;
+  document.getElementById('dashCredits').textContent=dashStats.credits.toLocaleString();
+}
+
+function addRecent(name, type, status){
+  recentItems.unshift({name,type,status});
+  if(recentItems.length>5)recentItems.pop();
+  const table=document.getElementById('recentTable');
+  table.innerHTML=recentItems.map(item=>`
+    <div class="table-row">
+      <span class="row-name">${item.name.substring(0,40)}</span>
+      <span><span class="badge"><span class="material-symbols-outlined">${item.type==='Blog'?'edit_note':'inventory_2'}</span>${item.type}</span></span>
+      <span class="status ${item.status==='Published'?'published':'draft'}"><span class="status-dot ${item.status==='Published'?'green':'gray'}"></span>${item.status}</span>
+      <button class="row-action">...</button>
+    </div>`).join('');
+}
+
+function setRunning(val){
+  document.getElementById('btnGenerate').disabled=val;
+  document.getElementById('btnStop').style.display=val?'block':'none';
+}
+
+function stopAll(){ stopRequested=true; log('Arret demande...','warn'); }
+
+// ── PLAN SUMMARY ──
+function updatePlan(){
+  const niche=document.getElementById('autoNiche').value.trim();
+  const topics=document.getElementById('autoTopics').value.trim().split('\n').filter(t=>t.trim());
+  const count=parseInt(document.getElementById('productCount')?document.getElementById('productCount').value:50);
+  const markup=document.getElementById('markupS')?document.getElementById('markupS').value:80;
+  const summary=document.getElementById('planSummary');
+  if(!niche){summary.innerHTML='Configure ta niche ci-dessus pour voir le plan de generation.';return;}
+  const estTime=Math.ceil((count*1.5+topics.length*2)/60);
+  summary.innerHTML=`<b>Niche :</b> ${niche}<br><b>Produits CJ a importer :</b> ${count} (majoration ${markup}%)<br><b>Articles de blog :</b> ${topics.length>0?topics.length+' articles':'aucun'}<br><b>Duree estimee :</b> ~${estTime} minutes`;
+}
+
+function addTopic(t){const ta=document.getElementById('autoTopics');ta.value+=(ta.value?'\n':'')+t;updatePlan();}
+function addBlogTopic(t){const ta=document.getElementById('blogTopics');ta.value+=(ta.value?'\n':'')+t;}
+
+// ── PHASE HELPERS ──
+function setPhase(num,status){
+  const dot=document.getElementById('ph'+num+'dot');
+  const stat=document.getElementById('ph'+num+'status');
+  const phase=document.getElementById('phase'+num);
+  if(status==='active'){dot.className='phase-indicator active';stat.textContent='En cours...';phase.className='phase-row active';}
+  else if(status==='done'){dot.className='phase-indicator done';stat.textContent='Termine';phase.className='phase-row done';}
+  else{dot.className='phase-indicator';stat.textContent='En attente';phase.className='phase-row';}
+}
+function setPhaseCount(num,text){document.getElementById('ph'+num+'count').textContent=text;}
+
+// ── CJ LOGIN ──
+async function loginCJ(){
+  const email=document.getElementById('cjEmail').value.trim();
+  const password=document.getElementById('cjPassword').value.trim();
+  if(!email||!password){log('Email et mot de passe CJ requis','err');return;}
+  const s=document.getElementById('cjStatus');
+  s.style.color='var(--text3)';s.textContent='Connexion...';
+  log('Connexion a CJ Dropshipping...','info');
+  try{
+    const r=await fetch('/api/cj-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const data=await r.json();
+    if(data.result&&data.data&&data.data.accessToken){
+      cjToken=data.data.accessToken;
+      s.style.color='var(--primary)';s.textContent='Connecte a CJ';
+      log('CJ connecte avec succes','ok');
+    }else{
+      s.style.color='var(--error)';s.textContent='Identifiants incorrects';
+      log('Erreur CJ: '+(data.message||'Identifiants incorrects'),'err');
+    }
+  }catch(e){s.style.color='var(--error)';s.textContent='Erreur reseau';log('Erreur CJ: '+e.message,'err');}
+}
+
+// ── HANDLE GENERATE CLICK (context-aware) ──
+function handleGenerateClick(){
+  const activePage=document.querySelector('.page.active').id;
+  if(activePage==='page-auto')startFullAuto();
+  else if(activePage==='page-products')searchAndImport();
+  else if(activePage==='page-blog')generateBlogArticles();
+  else if(activePage==='page-descriptions')startDescriptions();
+  else showPage('auto',document.querySelectorAll('.nav-item')[2]);
+}
+
+// ── SEARCH + IMPORT ──
+async function searchAndImport(){
+  const keyword=document.getElementById('searchInput').value.trim();
+  if(!keyword){log('Entre un mot-cle','warn','logBody2');return;}
+  if(!cjToken){log('Connecte-toi a CJ dans Parametres','err','logBody2');return;}
+  const shopUrl=document.getElementById('shopUrl').value.trim();
+  const shopToken=document.getElementById('shopToken').value.trim();
+  const anthropicKey=document.getElementById('anthropicKey').value.trim();
+  if(!shopUrl||!shopToken||!anthropicKey){log('Configure Shopify + Anthropic dans Parametres','err','logBody2');return;}
+  const limit=parseInt(document.getElementById('productCount').value);
+  const markup=parseInt(document.getElementById('markup').value)/100;
+  setRunning(true);stopRequested=false;stats={total:0,done:0,ok:0,err:0};startTime=Date.now();
+  log(`Recherche "${keyword}" (${limit} produits)...`,'info','logBody2');
+  try{
+    let all=[],page=1;
+    while(all.length<limit){
+      const r=await fetch(`/api/cj-search?cjToken=${encodeURIComponent(cjToken)}&keyword=${encodeURIComponent(keyword)}&page=${page}&limit=20`);
+      const data=await r.json();
+      if(!data.data||!data.data.list||data.data.list.length===0)break;
+      all=all.concat(data.data.list);page++;
+      if(all.length>=limit)break;
+    }
+    all=all.slice(0,limit);
+    stats.total=all.length;
+    log(`${all.length} produits trouves. Import en cours...`,'ok','logBody2');
+    for(let i=0;i<all.length;i++){
+      if(stopRequested)break;
+      const p=all[i];const title=p.productNameEn||p.productName||'Product';
+      try{
+        const genR=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anthropicKey,title,productType:p.categoryName||'',tags:p.productType||'',mode:'product'})});
+        const gen=await genR.json();
+        if(gen.error)throw new Error(gen.error);
+        const finalPrice=((parseFloat(p.sellPrice||p.productPrice||10))*(1+markup)).toFixed(2);
+        const images=p.productImage?[{src:p.productImage}]:[];
+        const impR=await fetch('/api/shopify-import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({store:shopUrl,token:shopToken,product:{title:gen.title_fr||title,body_html:`${gen.desc_fr||''}<hr/><p><em>${gen.desc_en||''}</em></p>`,vendor:'CJ Dropshipping',product_type:p.categoryName||'',status:'active',images,variants:[{price:finalPrice,requires_shipping:true}]}})});
+        const impData=await impR.json();
+        if(impData.product&&impData.product.id){stats.ok++;dashStats.products++;dashStats.credits+=2;updateDash();addRecent(gen.title_fr||title,'Product','Published');log(`OK "${gen.title_fr||title}"`,'ok','logBody2');}
+        else throw new Error('Shopify error');
+      }catch(e){stats.err++;log(`Erreur ${title.substring(0,25)} — ${e.message}`,'err','logBody2');}
+      stats.done++;await sleep(1000);
+    }
+    log(`Termine — ${stats.ok} produits importes`,'info','logBody2');
+  }catch(e){log('Erreur: '+e.message,'err','logBody2');}
+  setRunning(false);
+}
+
+// ── BLOG ──
+async function generateBlogArticles(){
+  const shopUrl=document.getElementById('shopUrl').value.trim();
+  const shopToken=document.getElementById('shopToken').value.trim();
+  const anthropicKey=document.getElementById('anthropicKey').value.trim();
+  const unsplashKey=document.getElementById('unsplashKey').value.trim();
+  const topics=document.getElementById('blogTopics').value.trim().split('\n').filter(t=>t.trim());
+  if(!shopUrl||!shopToken||!anthropicKey){log('Configure Shopify + Anthropic dans Parametres','err','logBody3');return;}
+  if(topics.length===0){log('Ajoute au moins un sujet','warn','logBody3');return;}
+  setRunning(true);stopRequested=false;
+  log(`Generation de ${topics.length} articles...`,'info','logBody3');
+  let blogId=null;
+  try{
+    const bR=await fetch(`/api/shopify-blog?store=${shopUrl}&token=${shopToken}`);
+    const bData=await bR.json();
+    if(bData.blogs&&bData.blogs.length>0)blogId=bData.blogs[0].id;
+    else{log('Aucun blog Shopify — cree un blog dans ton admin','err','logBody3');setRunning(false);return;}
+  }catch(e){log('Erreur blog: '+e.message,'err','logBody3');setRunning(false);return;}
+  for(let i=0;i<topics.length;i++){
+    if(stopRequested)break;
+    const topic=topics[i].trim();
+    log(`[${i+1}/${topics.length}] "${topic}"...`,'dim','logBody3');
+    try{
+      const genR=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anthropicKey,title:topic,mode:'blog'})});
+      const gen=await genR.json();if(gen.error)throw new Error(gen.error);
+      let imageHtml='';
+      if(unsplashKey){try{const imgR=await fetch(`/api/unsplash?unsplashKey=${unsplashKey}&keyword=${encodeURIComponent(topic)}`);const imgData=await imgR.json();if(imgData.url){imageHtml=`<img src="${imgData.url}" alt="${imgData.alt}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;"/><p style="font-size:0.75rem;color:#999;">Photo par <a href="${imgData.authorUrl}?utm_source=shopforge&utm_medium=referral" target="_blank">${imgData.author}</a> sur <a href="https://unsplash.com?utm_source=shopforge&utm_medium=referral" target="_blank">Unsplash</a></p>`;}}catch(e){}}
+      const artR=await fetch(`/api/shopify-blog?store=${shopUrl}&token=${shopToken}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({blogId,article:{title:gen.title_fr,body_html:`${imageHtml}${gen.body_fr}<hr/><p><em>${gen.body_en}</em></p>`,published:true}})});
+      const artData=await artR.json();
+      if(artData.article){dashStats.blog++;dashStats.credits++;updateDash();addRecent(gen.title_fr,'Blog','Published');log(`Publie: "${gen.title_fr}"`,'ok','logBody3');}
+      else throw new Error('Shopify article error');
+    }catch(e){log(`Erreur "${topic}" — ${e.message}`,'err','logBody3');}
+    await sleep(1200);
+  }
+  log(`Termine`,'info','logBody3');
+  setRunning(false);
+}
+
+// ── DESCRIPTIONS ──
+async function startDescriptions(){
+  const shopUrl=document.getElementById('shopUrl').value.trim();
+  const shopToken=document.getElementById('shopToken').value.trim();
+  const anthropicKey=document.getElementById('anthropicKey').value.trim();
+  if(!shopUrl||!shopToken||!anthropicKey){log('Configure Shopify + Anthropic dans Parametres','err','logBody4');return;}
+  setRunning(true);stopRequested=false;
+  log('Recuperation des produits...','info','logBody4');
+  try{
+    let products=[],pageInfo=null;
+    do{
+      let url=`/api/products?store=${shopUrl}&token=${shopToken}&limit=250`;
+      if(pageInfo)url+=`&page_info=${pageInfo}`;
+      const r=await fetch(url);const data=await r.json();
+      products=products.concat(data.products||[]);pageInfo=data.nextPageInfo||null;
+    }while(pageInfo);
+    log(`${products.length} produits a reecrire`,'info','logBody4');
+    for(let i=0;i<products.length;i++){
+      if(stopRequested)break;
+      const p=products[i];
+      try{
+        const genR=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anthropicKey,title:p.title,productType:p.product_type,tags:p.tags,mode:'product'})});
+        const gen=await genR.json();
+        const updR=await fetch(`/api/update?store=${shopUrl}&token=${shopToken}&id=${p.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({product:{id:p.id,title:gen.title_fr||p.title,body_html:`${gen.desc_fr}<hr/><p><em>${gen.desc_en}</em></p>`}})});
+        if(updR.ok){dashStats.credits++;updateDash();log(`OK ${p.title}`,'ok','logBody4');}
+        else throw new Error('Update failed');
+      }catch(e){log(`Erreur ${p.title} — ${e.message}`,'err','logBody4');}
+      await sleep(900);
+    }
+    log('Termine','info','logBody4');
+  }catch(e){log('Erreur: '+e.message,'err','logBody4');}
+  setRunning(false);
+}
+
+// ── FULL AUTO ──
+async function startFullAuto(){
+  const niche=document.getElementById('autoNiche').value.trim();
+  const topics=document.getElementById('autoTopics').value.trim().split('\n').filter(t=>t.trim());
+  const shopUrl=document.getElementById('shopUrl').value.trim();
+  const shopToken=document.getElementById('shopToken').value.trim();
+  const anthropicKey=document.getElementById('anthropicKey').value.trim();
+  const unsplashKey=document.getElementById('unsplashKey').value.trim();
+  const markup=parseInt(document.getElementById('markupS')?document.getElementById('markupS').value:80)/100;
+  const limit=parseInt(document.getElementById('productCount')?document.getElementById('productCount').value:50);
+  if(!niche){log('Entre une niche','err');return;}
+  if(!cjToken){log('Connecte-toi a CJ dans Parametres','err');return;}
+  if(!shopUrl||!shopToken||!anthropicKey){log('Configure Shopify + Anthropic dans Parametres','err');return;}
+  document.getElementById('autoPhases').style.display='flex';
+  setRunning(true);stopRequested=false;
+  stats={total:0,done:0,ok:0,err:0};startTime=Date.now();
+  log('=== FULL AUTO DEMARRE ===','info');
+
+  // Phase 1
+  setPhase(1,'active');
+  let products=[];
+  try{
+    let page=1;
+    while(products.length<limit){
+      const r=await fetch(`/api/cj-search?cjToken=${encodeURIComponent(cjToken)}&keyword=${encodeURIComponent(niche)}&page=${page}&limit=20`);
+      const data=await r.json();
+      if(!data.data||!data.data.list||data.data.list.length===0)break;
+      products=products.concat(data.data.list);page++;
+      if(products.length>=limit)break;
+    }
+    products=products.slice(0,limit);
+    stats.total=products.length+topics.length;updateStats();
+    setPhaseCount(1,products.length+' produits');
+    log(`${products.length} produits trouves pour "${niche}"`,'ok');
+  }catch(e){log('Erreur CJ: '+e.message,'err');}
+
+  // Phase 2
+  setPhase(1,'done');setPhase(2,'active');
+  let importedOk=0;
+  for(let i=0;i<products.length;i++){
+    if(stopRequested)break;
+    const p=products[i];const title=p.productNameEn||p.productName||'Product';
+    try{
+      const genR=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anthropicKey,title,productType:p.categoryName||'',tags:p.productType||'',mode:'product'})});
+      const gen=await genR.json();if(gen.error)throw new Error(gen.error);
+      const finalPrice=((parseFloat(p.sellPrice||p.productPrice||10))*(1+markup)).toFixed(2);
+      const images=p.productImage?[{src:p.productImage}]:[];
+      const impR=await fetch('/api/shopify-import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({store:shopUrl,token:shopToken,product:{title:gen.title_fr||title,body_html:`${gen.desc_fr||''}<hr/><p><em>${gen.desc_en||''}</em></p>`,vendor:'CJ Dropshipping',product_type:p.categoryName||'',status:'active',images,variants:[{price:finalPrice,requires_shipping:true}]}})});
+      const impData=await impR.json();
+      if(impData.product&&impData.product.id){importedOk++;stats.ok++;dashStats.products++;dashStats.credits+=2;updateDash();addRecent(gen.title_fr||title,'Product','Published');log(`OK "${gen.title_fr||title}"`,'ok');}
+      else throw new Error('Shopify error');
+    }catch(e){stats.err++;log(`Erreur ${title.substring(0,25)} — ${e.message}`,'err');}
+    stats.done++;updateStats();await sleep(1000);
+  }
+  setPhase(2,'done');setPhaseCount(2,importedOk+' importes');
+  log(`${importedOk} produits importes`,'ok');
+
+  // Phase 3
+  if(topics.length>0&&!stopRequested){
+    setPhase(3,'active');
+    let blogId=null;
+    try{const bR=await fetch(`/api/shopify-blog?store=${shopUrl}&token=${shopToken}`);const bData=await bR.json();if(bData.blogs&&bData.blogs.length>0)blogId=bData.blogs[0].id;}catch(e){}
+    let blogOk=0;
+    if(blogId){
+      for(let i=0;i<topics.length;i++){
+        if(stopRequested)break;
+        const topic=topics[i].trim();
+        try{
+          const genR=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anthropicKey,title:topic,mode:'blog'})});
+          const gen=await genR.json();if(gen.error)throw new Error(gen.error);
+          let imageHtml='';
+          if(unsplashKey){try{const imgR=await fetch(`/api/unsplash?unsplashKey=${unsplashKey}&keyword=${encodeURIComponent(topic)}`);const imgData=await imgR.json();if(imgData.url)imageHtml=`<img src="${imgData.url}" alt="${imgData.alt}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;"/>`;}catch(e){}}
+          const artR=await fetch(`/api/shopify-blog?store=${shopUrl}&token=${shopToken}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({blogId,article:{title:gen.title_fr,body_html:`${imageHtml}${gen.body_fr}<hr/><p><em>${gen.body_en}</em></p>`,published:true}})});
+          const artData=await artR.json();
+          if(artData.article){blogOk++;stats.ok++;dashStats.blog++;dashStats.credits++;updateDash();addRecent(gen.title_fr,'Blog','Published');log(`Article: "${gen.title_fr}"`,'ok');}
+        }catch(e){stats.err++;log(`Erreur article — ${e.message}`,'err');}
+        stats.done++;updateStats();await sleep(1200);
+      }
+    }
+    setPhase(3,'done');setPhaseCount(3,blogOk+' articles');
+  }else{setPhase(3,'done');setPhaseCount(3,'—');}
+
+  log(`=== TERMINE — ${importedOk} produits, ${dashStats.blog} articles ===`,'info');
+  setRunning(false);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
